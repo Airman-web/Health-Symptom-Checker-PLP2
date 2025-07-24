@@ -34,19 +34,30 @@ conn.close()
 print("Database created and data inserted successfully!")
 
 # This script initializes a SQLite database for health symptom checking.
-import sqlite3
-
+import sqlite3 
+ 
 DB_NAME = "health_symptom_checker.db"
 
 def find_conditions_from_symptom(symptom_list):
+    """
+    Find conditions based on a list of symptoms.
+    
+    :param symptom_list: List of symptoms to check
+    :return: Dictionary with symptoms as keys and conditions as values
+    """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-
-    conditions = {}
+    
+    conditions_dict = {}
+    
     for symptom in symptom_list:
-        cursor.execute("SELECT condition, self_care FROM symptoms_conditions WHERE symptom = ?", (symptom,))
-        results = cursor.fetchall()
-        conditions[symptom] = results  
-
+        cursor.execute("SELECT condition FROM symptoms_conditions WHERE symptom = ?", (symptom,))
+        conditions = cursor.fetchall()
+        
+        if conditions:
+            conditions_dict[symptom] = [condition[0] for condition in conditions]
+        else:
+            conditions_dict[symptom] = []
+    
     conn.close()
-    return conditions
+    return conditions_dict
