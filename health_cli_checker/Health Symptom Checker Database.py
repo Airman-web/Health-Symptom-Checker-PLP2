@@ -38,4 +38,16 @@ import sqlite3
 
 DB_NAME = "health_symptom_checker.db"
 
-def find-conditions_from_symptom(symptom_list): 
+def find_conditions_from_symptom(symptom_list):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    conditions = {}
+    for symptom in symptom_list:
+        cursor.execute("SELECT condition FROM symptoms_conditions WHERE symptom = ?", (symptom,))
+        result = cursor.fetchone()
+        if result:
+            conditions[symptom] = result[0]
+
+    conn.close()
+    return conditions
