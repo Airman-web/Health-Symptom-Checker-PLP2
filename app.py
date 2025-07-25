@@ -26,7 +26,7 @@ def check_symptoms():
         print("No symptoms entered.")
         return
     
-    print(f"Checking symptoms: {symptoms}")
+    print(f"Checking symptoms: {symptoms.capitalize()}")
     print("Conditions will be displayed here...")
     # TODO: Connect to P3 matcher module
 
@@ -48,10 +48,10 @@ def manage_clinics():
         print("Available clinics will be listed here...")
         # TODO: Connect to P4 clinics module
     elif choice == "2":
-        name = input("Clinic name: ")
-        city = input("City: ")
-        distance = input("Distance (km): ")
-        print(f"Clinic '{name}' in {city} ({distance}km) would be added")
+        name = input("Clinic name: ").strip().lower()
+        city = input("City: ").strip().lower()
+        distance = input("Distance (km): ").strip().lower()
+        print(f"Clinic '{name.capitalize()}' in {city.capitalize()} ({distance}km) would be added")
         # TODO: Connect to P4 clinics module
     else:
         print("Invalid option")
