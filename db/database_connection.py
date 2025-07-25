@@ -73,7 +73,6 @@ class HealthSystem:
             traceback.print_exc()
             raise
 
-
 # Run if script is executed directly
 if __name__ == "__main__":
     HealthSystem()
