@@ -3,7 +3,6 @@ from mysql.connector import Error
 from typing import Optional
 import traceback
 
-
 class HealthSystem:
     def __init__(self):
         self.connection: Optional[mysql.connector.connection_cext.CMySQLConnection] = None
