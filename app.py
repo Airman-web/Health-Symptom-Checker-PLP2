@@ -9,6 +9,8 @@ def show_menu():
     print("\n" + "="*30)
     print("HEALTH CLI CHECKER")
     print("="*30)
+    print("MAIN MENU")
+    print("="*30)
     print("1. Check Symptoms")
     print("2. Access History") 
     print("3. Add/View Clinics")
@@ -18,7 +20,7 @@ def show_menu():
 def check_symptoms():
     """Handle symptom input and show conditions"""
     print("\n--- SYMPTOM CHECKER ---")
-    symptoms = input("Enter your symptoms (comma separated): ").strip()
+    symptoms = input("Enter your symptoms (comma separated): ").strip().lower()
     
     if not symptoms:
         print("No symptoms entered.")
