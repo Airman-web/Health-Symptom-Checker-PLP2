@@ -38,4 +38,4 @@ import sqlite3
 
 DB_NAME = "health_symptom_checker.db"
 
-def find-conditions_from_symptom(symptom_list):
+def find-conditions_from_symptom(symptom_list): 
