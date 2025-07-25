@@ -50,7 +50,7 @@ def manage_clinics():
     elif choice == "2":
         name = input("Clinic name: ").strip().lower()
         city = input("City: ").strip().lower()
-        distance = input("Distance (km): ").strip().lower()
+        distance = float(input("Distance (km): ").strip())
         print(f"Clinic '{name.capitalize()}' in {city.capitalize()} ({distance}km) would be added")
         # TODO: Connect to P4 clinics module
     else:
