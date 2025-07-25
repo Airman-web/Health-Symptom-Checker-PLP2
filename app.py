@@ -74,7 +74,9 @@ def main():
         elif choice == "3":
             manage_clinics()
         elif choice == "4":
+            print("="*30)
             print("Goodbye!")
+            print("="*30)
             break
         else:
             print("Invalid choice. Please enter 1-4.")
