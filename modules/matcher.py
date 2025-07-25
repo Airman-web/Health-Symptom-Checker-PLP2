@@ -1,5 +1,5 @@
 symptom_db = {
-    "": [
+    "fever": [
         ("Flu", "Rest, stay hydrated, take paracetamol"),
         ("Malaria", "Visit a clinic for a blood test and treatment"),
         ("Common Cold", "Rest and drink warm fluids")
