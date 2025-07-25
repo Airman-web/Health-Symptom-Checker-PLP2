@@ -50,7 +50,11 @@ def manage_clinics():
     elif choice == "2":
         name = input("Clinic name: ").strip().lower()
         city = input("City: ").strip().lower()
-        distance = float(input("Distance (km): ").strip())
+        try:
+            distance = float(input("Distance (km): "))
+            print(f"Distance: {distance}km")
+        except ValueError:
+            print("Error: Please enter a valid number")
         print(f"Clinic '{name.capitalize()}' in {city.capitalize()} ({distance}km) would be added")
         # TODO: Connect to P4 clinics module
     else:
