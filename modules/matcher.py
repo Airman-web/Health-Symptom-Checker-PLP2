@@ -23,8 +23,22 @@ symptom_db = {
         ("Strep Throat", "Visit a doctor for antibiotics"),
         ("Flu", "Gargle warm salt water and rest"),
         ("Common Cold", "Use throat lozenges and drink warm fluids")
+    ],
+    "shortness of breath": [
+        ("Asthma", "Use prescribed inhaler and avoid triggers"),
+        ("COVID-19", "Seek medical attention if severe"),
+        ("Pneumonia", "Get medical treatment immediately")
+    ],
+    "diarrhea": [
+        ("Food Poisoning", "Drink oral rehydration solutions and rest"),
+        ("Cholera", "Seek urgent treatment and rehydration"),
+        ("Stomach Virus", "Stay hydrated and avoid dairy")
+    ],
+    "chest pain": [
+        ("Heart Attack", "Call emergency services immediately"),
+        ("Heartburn", "Avoid spicy food, use antacids"),
+        ("Muscle Strain", "Rest and apply heat")
     ]
-
 }
 def match_symptoms(symptoms_list):
     """
@@ -35,9 +49,9 @@ def match_symptoms(symptoms_list):
     for symptom in symptoms_list:
         symptom = symptom.strip().lower()
         if symptom in symptom_db:
-            results.extend(symptom_db[symptom])  # Add all matches
+            results.extend(symptom_db[symptom])  
 
-    # Remove duplicates
+    
     unique_results = list(set(results))
 
     return unique_results
