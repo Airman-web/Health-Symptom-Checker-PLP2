@@ -41,9 +41,7 @@ symptom_db = {
     ]
 }
 def match_symptoms(symptoms_list):
-    """
-    Accepts a list of symptoms, returns a list of matching (condition, self-care) tuples.
-    """
+    
     results = []
 
     for symptom in symptoms_list:
