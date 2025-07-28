@@ -1,0 +1,56 @@
+# modules/i18n.py
+
+MESSAGES = {
+    "en": {
+        "welcome": "Welcome to the Health Symptom Checker CLI App!",
+        "choose_lang": "Choose language (en/rw): ",
+        "enter_name": "Enter your name: ",
+        "how_feeling": "How are you feeling today?",
+        "ask_run_check": "Would you like to run a quick check based on your symptoms?",
+        "available_symptoms": "Available symptoms you can check:",
+        "symptom_prompt": "Enter your symptoms separated by commas: ",
+        "matching": "Matching your symptoms with possible conditions...",
+        "no_match": "No conditions found for your symptoms.",
+        "try_simpler": "Try entering more common or simpler symptoms.",
+        "possible": "Possible conditions and self-care tips:",
+        "disclaimer": "Disclaimer: This is not 100% accurate. Please consult a medical professional.",
+        "history_fetch": "Fetching your previous health reports...",
+        "history_none": "You have no saved health check history.",
+        "main_menu": "MAIN MENU",
+        "menu_1": "1. Run new health check",
+        "menu_2": "2. View previous checks",
+        "menu_3": "3. Exit",
+        "choose_option": "Choose an option: ",
+        "goodbye": "Goodbye, {0}. Take care of your health!",
+        "clinic_reco": "We recommend visiting {0} and see Dr. {1} (Contact: {2}).",
+        "invalid_choice": "Invalid choice, please try again.",
+    },
+    "rw": {
+        "welcome": "Murakaza neza muri Health Symptom Checker CLI App!",
+        "choose_lang": "Hitamo ururimi (en/rw): ",
+        "enter_name": "Injiza izina ryawe: ",
+        "how_feeling": "Ni gute wiyumva uyu munsi?",
+        "ask_run_check": "Urashaka kugenzura ibimenyetso byawe?",
+        "available_symptoms": "Ibimenyetso ushobora kureba:",
+        "symptom_prompt": "Injiza ibimenyetso byawe bitandukanyijwe na koma: ",
+        "matching": "Guhuza ibimenyetso byawe n'indwara zishoboka...",
+        "no_match": "Nta ndwara zabonetse ku bimenyetso byawe.",
+        "try_simpler": "Gerageza kwandika ibimenyetso bizwi cyane cyangwa byoroshye.",
+        "possible": "Indwara zishoboka n'inama zo kwiyitaho:",
+        "disclaimer": "Iyi gahunda ntifite 100% neza. Nyamuneka saba muganga inama.",
+        "history_fetch": "Turimo gushaka raporo zawe zabanje...",
+        "history_none": "Nta raporo wabitse mu mateka yawe.",
+        "main_menu": "MENYU NYAMUKURU",
+        "menu_1": "1. Genzura ibimenyetso bishya",
+        "menu_2": "2. Reba raporo zabanje",
+        "menu_3": "3. Sohoka",
+        "choose_option": "Hitamo uburyo: ",
+        "goodbye": "Urabeho, {0}. Witondere ubuzima bwawe!",
+        "clinic_reco": "Turagusaba gusura {0} no kubona Dr. {1} (Terefoni: {2}).",
+        "invalid_choice": "Ihitamo ntago ari ryo, ongera ugerageze.",
+    },
+}
+
+def T(lang, key):
+    """Translation function. Defaults to English if key or language is missing."""
+    return MESSAGES.get(lang, MESSAGES["en"]).get(key, MESSAGES["en"].get(key, key))
