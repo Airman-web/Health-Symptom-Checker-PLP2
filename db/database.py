@@ -1,41 +1,19 @@
+# db/database.py
 import sqlite3
+from pathlib import Path
 
-# 1. Connect to (or create) the database
-conn = sqlite3.connect("health.db")
+# Always point to the db file inside the db/ folder, no matter where you run from
+DB_PATH = (Path(__file__).resolve().parent / "health.db")
 
-# 2. Create a table if it doesn't exist yet
-conn.execute('''
-CREATE TABLE IF NOT EXISTS symptoms_conditions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    symptom TEXT,
-    condition TEXT,
-    self_care TEXT
-)
-''')
+def get_connection():
+    """Open a connection to the SQLite database file."""
+    return sqlite3.connect(DB_PATH)
 
-# 3. Insert example data into the table
-example_data = [
-    ("fever", "Malaria", "Drink plenty of fluids and get tested soon"),
-    ("cough", "Flu", "Rest, drink warm liquids, and take vitamin C"),
-    ("headache", "Dehydration", "Drink water and rest"),
-    ("nausea", "Food Poisoning", "Avoid solid foods, stay hydrated"),
-]
-
-# 4. Insert data into the table
-for symptom, condition, tip in example_data:
-    conn.execute("INSERT INTO symptoms_conditions (symptom, condition, self_care) VALUES (?, ?, ?)", (symptom, condition, tip))
-
-# 5. Save (commit) changes
-conn.commit()
-
-# 6. Close the connection
-conn.close()
-
-print("Database created and data inserted successfully!")
-
-# This script initializes a SQLite database for health symptom checking.
-import sqlite3 
- 
-DB_NAME = "health_symptom_checker.db"
-
-def find_conditions_from_symptom(symptom_list):
+def initialize_database():
+    """Create tables by executing schema.sql once."""
+    conn = get_connection()
+    schema_file = Path(__file__).resolve().parent / "schema.sql"
+    with open(schema_file, "r") as f:
+        conn.executescript(f.read())
+    conn.commit()
+    conn.close()
