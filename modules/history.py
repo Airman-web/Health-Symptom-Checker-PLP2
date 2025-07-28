@@ -1,41 +1,50 @@
-import json
-from datetime import datetime
-import os
+# modules/history.py
+from db.database import get_connection
 
-HISTORY_FILE = "history.json"
+def get_or_create_user(name: str, city: str):
+    conn = get_connection()
+    cur = conn.cursor()
 
-def save_to_history(symptoms, matched_conditions):
-    """Save a symptom check to history with timestamp."""
-    entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "symptoms": symptoms,
-        "matched_conditions": matched_conditions
-    }
+    cur.execute("SELECT id, city FROM users WHERE name = ?", (name,))
+    row = cur.fetchone()
+    if row:
+        # If the stored city is different, you could update it here if you want.
+        conn.close()
+        return row[0]
 
-    history = load_history()
-    history.append(entry)
+    cur.execute("INSERT INTO users (name, city) VALUES (?, ?)", (name, city))
+    conn.commit()
+    user_id = cur.lastrowid
+    conn.close()
+    return user_id
 
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=4)
+def get_user_city(user_id: int) -> str:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT city FROM users WHERE id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row[0] if row else "Kigali"
 
-def load_history():
-    """Load history from the file."""
-    if not os.path.exists(HISTORY_FILE):
-        return []
-    with open(HISTORY_FILE, "r") as f:
-        return json.load(f)
+def save_history(user_id, symptoms, conditions, self_care):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO history (user_id, symptoms, conditions, self_care)
+        VALUES (?, ?, ?, ?)
+    """, (user_id, symptoms, conditions, self_care))
+    conn.commit()
+    conn.close()
 
-def show_history():
-    """Display the history in a readable format."""
-    history = load_history()
-    if not history:
-        print("No history found.")
-        return
-
-    print("\n=== Symptom Check History ===\n")
-    for i, entry in enumerate(history, 1):
-        print(f"Check #{i}")
-        print(f"Time: {entry['timestamp']}")
-        print(f"Symptoms: {', '.join(entry['symptoms'])}")
-        print(f"Possible Conditions: {', '.join(entry['matched_conditions']) if entry['matched_conditions'] else 'None'}")
-        print("-" * 40)
+def view_history(user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT symptoms, conditions, self_care, timestamp
+        FROM history
+        WHERE user_id = ?
+        ORDER BY timestamp DESC
+    """, (user_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows

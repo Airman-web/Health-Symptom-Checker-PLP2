@@ -1,26 +1,36 @@
--- Database schema for the application: helps us define tables(symptoms, conditions, diseases, clinics) and their relationships.
-CREATE TABLE IF NOT EXISTS symptoms (
+-- db/schema.sql
+
+-- Users table now stores city
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    systom TEXT NOT NULL
+    name TEXT NOT NULL,
+    city TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS conditions (
+CREATE TABLE IF NOT EXISTS history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    condition_name TEXT NOT NULL,
-    self-care_tips TEXT,
+    user_id INTEGER NOT NULL,
+    symptoms TEXT NOT NULL,
+    conditions TEXT NOT NULL,
+    self_care TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS symptom_condition (
-    symptom_id INTEGER,
-    condition_id INTEGER,
-    FOREIGN KEY (symptom_id) REFERENCES symptoms(id),
-    FOREIGN KEY (condition_id) REFERENCES conditions(id)
-
+CREATE TABLE IF NOT EXISTS symptoms_conditions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symptom TEXT NOT NULL,
+    condition TEXT NOT NULL,
+    self_care TEXT NOT NULL
 );
 
+-- Add district & sector to better localize clinics inside Kigali
 CREATE TABLE IF NOT EXISTS clinics (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    clinic_name TEXT NOT NULL,
-    location_name TEXT NOT NULL,
-
+    name TEXT NOT NULL,
+    doctor TEXT NOT NULL,
+    city TEXT NOT NULL,
+    district TEXT NOT NULL,
+    sector TEXT NOT NULL,
+    contact TEXT
 );

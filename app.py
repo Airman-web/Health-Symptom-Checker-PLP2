@@ -1,85 +1,152 @@
-#!/usr/bin/env python3
-"""
-Health CLI Checker - Basic Menu (P1)
-CLI Entry & User Flow with simple menu system
-"""
+import time
+from colorama import Fore, Style, init
+import pyfiglet
 
-def show_menu():
-    """Display main menu options"""
-    print("\n" + "="*30)
-    print("HEALTH CLI CHECKER")
-    print("="*30)
-    print("MAIN MENU")
-    print("="*30)
-    print("1. Check Symptoms")
-    print("2. Access History") 
-    print("3. Add/View Clinics")
-    print("4. Exit")
-    print("-"*30)
+from modules.i18n import T
+from modules.matcher import find_ranked_conditions
+from modules.history import (
+    get_or_create_user,
+    get_user_city,
+    save_history,
+    view_history,
+)
+from modules.clinics import get_clinic_by_city, get_random_clinic
+from db.database import get_connection
 
-def check_symptoms():
-    """Handle symptom input and show conditions"""
-    print("\n--- SYMPTOM CHECKER ---")
-    symptoms = input("Enter your symptoms (comma separated): ").strip().lower()
-    
-    if not symptoms:
-        print("No symptoms entered.")
+init(autoreset=True)
+
+# ---------- Color helpers ----------
+def c_info(text): return Fore.CYAN + text + Style.RESET_ALL
+def c_good(text): return Fore.GREEN + text + Style.RESET_ALL
+def c_warn(text): return Fore.RED + text + Style.RESET_ALL
+def c_prompt(text): return Fore.YELLOW + text + Style.RESET_ALL
+def c_header(text): return Fore.BLUE + text + Style.RESET_ALL
+def c_result(text): return Fore.MAGENTA + text + Style.RESET_ALL
+
+# ---------- Utilities ----------
+def get_all_symptoms():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT symptom FROM symptoms_conditions ORDER BY symptom ASC")
+    symptoms = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return symptoms
+
+def banner(lang):
+    print(c_header("=" * 60))
+    print(c_good(pyfiglet.figlet_format("Health Checker", font="slant")))
+    print(c_header("=" * 60))
+    print(c_info(T(lang, "welcome")))
+
+def choose_language():
+    lang = input(c_prompt(T("en", "choose_lang"))).strip().lower()
+    return "rw" if lang == "rw" else "en"
+
+def greet_user(lang):
+    name = input(c_prompt(T(lang, "enter_name"))).strip()
+    city = input(c_prompt("Enter your city (e.g., Kigali): ")).strip() or "Kigali"
+    user_id = get_or_create_user(name, city)
+    print(c_good(f"\n{name}, {T(lang, 'how_feeling')}"))
+    print(c_info(T(lang, "ask_run_check")))
+    return name, user_id
+
+def fake_processing(message="Processing", secs=1.2):
+    print(c_header("\n" + message))
+    steps = 4
+    for i in range(steps):
+        print(".", end="", flush=True)
+        time.sleep(secs / steps)
+    print()
+
+def symptom_check(lang, user_id):
+    all_symptoms = get_all_symptoms()
+    print(c_result("\n" + T(lang, "available_symptoms")))
+    print(Fore.WHITE + ", ".join(all_symptoms))
+
+    symptoms_raw = input(c_prompt("\n" + T(lang, "symptom_prompt")))
+    symptoms_list = [s.strip().lower() for s in symptoms_raw.split(",") if s.strip()]
+
+    fake_processing(T(lang, "matching"), secs=1.5)
+
+    ranked = find_ranked_conditions(symptoms_list)
+
+    if not ranked:
+        print(c_warn("\n" + T(lang, "no_match")))
+        print(c_info(T(lang, "try_simpler")))
         return
-    
-    print(f"Checking symptoms: {symptoms.capitalize()}")
-    print("Conditions will be displayed here...")
-    # TODO: Connect to P3 matcher module
 
-def access_history():
-    """Show user's symptom check history"""
-    print("\n--- HISTORY ---")
-    print("Your previous symptom checks will appear here...")
-    # TODO: Connect to P5 history module
+    print(c_header("\n" + T(lang, "possible") + "\n"))
 
-def manage_clinics():
-    """Add or view clinics"""
-    print("\n--- CLINICS ---")
-    print("1. View Clinics")
-    print("2. Add Clinic")
-    
-    choice = input("Choose option (1-2): ").strip()
-    
-    if choice == "1":
-        print("Available clinics will be listed here...")
-        # TODO: Connect to P4 clinics module
-    elif choice == "2":
-        name = input("Clinic name: ").strip().lower()
-        city = input("City: ").strip().lower()
-        try:
-            distance = float(input("Distance (km): "))
-            print(f"Distance: {distance}km")
-        except ValueError:
-            print("Error: Please enter a valid number")
-        print(f"Clinic '{name.capitalize()}' in {city.capitalize()} ({distance}km) would be added")
-        # TODO: Connect to P4 clinics module
-    else:
-        print("Invalid option")
+    all_conditions, all_self_care = [], []
+    for item in ranked:
+        condition, score, tips = item["condition"], item["score"], item["tips"]
+        print(c_result(f"- {condition} ") + Fore.WHITE + f"(score: {score})")
+        for tip in tips:
+            print(Fore.WHITE + f"  • {tip}")
+        all_conditions.append(condition)
+        all_self_care.extend(tips)
+        time.sleep(0.25)
+
+    save_history(
+        user_id,
+        ", ".join(symptoms_list),
+        ", ".join(all_conditions),
+        "; ".join(list(set(all_self_care))),
+    )
+
+    # Recommend clinic in user's city (fallback to any clinic)
+    city = get_user_city(user_id)
+    clinic = get_clinic_by_city(city) or get_random_clinic()
+    time.sleep(0.8)
+    if clinic:
+        print(c_good(f"\nBefore you go, you can visit {clinic[0]} and see {clinic[1]} (Contact: {clinic[2]})."))
+
+    print(c_warn("\n" + T(lang, "disclaimer")))
+
+def view_user_history_screen(lang, user_id):
+    print(c_header("\n" + T(lang, "history_fetch")))
+    time.sleep(0.6)
+    records = view_history(user_id)
+    if not records:
+        print(c_info(T(lang, "history_none")))
+        return
+
+    for idx, (symptoms, conditions, self_care, timestamp) in enumerate(records, 1):
+        print(c_result(f"\n{idx}. [{timestamp}]"))
+        print(Fore.WHITE + f"   Symptoms:    {symptoms}")
+        print(Fore.WHITE + f"   Conditions:  {conditions}")
+        print(Fore.WHITE + f"   Self-care:   {self_care}")
+        time.sleep(0.15)
+
+def main_menu(lang):
+    print(c_header("\n========== " + T(lang, "main_menu") + " =========="))
+    print(c_good(T(lang, "menu_1")))
+    print(c_info(T(lang, "menu_2")))
+    print(c_warn(T(lang, "menu_3")))
+    print(c_header("======================================="))
 
 def main():
-    """Main application loop with basic menu"""
-    
+    lang = choose_language()
+    banner(lang)
+    name, user_id = greet_user(lang)
+
     while True:
-        show_menu()
-        choice = input("Enter choice (1-4): ").strip()
-        
+        main_menu(lang)
+        choice = input(c_prompt(T(lang, "choose_option"))).strip()
+
         if choice == "1":
-            check_symptoms()
+            symptom_check(lang, user_id)
         elif choice == "2":
-            access_history()
+            view_user_history_screen(lang, user_id)
         elif choice == "3":
-            manage_clinics()
-        elif choice == "4":
-            print("="*30)
-            print("Goodbye!")
-            print("="*30)
+            print(c_info("\n" + T(lang, "goodbye").format(name)))
+            city = get_user_city(user_id)
+            clinic = get_clinic_by_city(city) or get_random_clinic()
+            if clinic:
+                print(c_good(T(lang, "clinic_reco").format(clinic[0], clinic[1], clinic[2])))
             break
         else:
-            print("Invalid choice. Please enter 1-4.")
+            print(c_warn(T(lang, "invalid_choice")))
 
 if __name__ == "__main__":
     main()
