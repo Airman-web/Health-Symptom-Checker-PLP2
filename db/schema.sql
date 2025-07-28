@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS clinics (
     name TEXT NOT NULL,
     doctor TEXT NOT NULL,
     contact TEXT NOT NULL,
-    city TEXT NOT NULL
+    city TEXT NOT NULL,
+    district TEXT NOT NULL,
+    sector TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS history (
