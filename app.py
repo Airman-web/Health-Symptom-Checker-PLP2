@@ -1,3 +1,4 @@
+# Before dealing with app first install colorama, pyfiglet
 import time
 from colorama import Fore, Style, init
 import pyfiglet
