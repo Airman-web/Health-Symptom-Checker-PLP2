@@ -22,3 +22,4 @@ def get_random_clinic():
     row = cur.fetchone()
     conn.close()
     return row
+i hate coding
