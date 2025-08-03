@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-# Before dealing with app first install colorama, pyfiglet
+# Before running this app, install: colorama, pyfiglet
+
 import time
 from colorama import Fore, Style, init
 import pyfiglet
@@ -26,7 +27,6 @@ def c_header(text): return Fore.BLUE + text + Style.RESET_ALL
 def c_result(text): return Fore.MAGENTA + text + Style.RESET_ALL
 
 # ---------- Utilities ----------
-# Functions that calls the database and make the menu
 def get_all_symptoms():
     conn = get_connection()
     cur = conn.cursor()
@@ -42,8 +42,13 @@ def banner(lang):
     print(c_info(T(lang, "welcome")))
 
 def choose_language():
-    lang = input(c_prompt(T("en", "choose_lang"))).strip().lower()
-    return "rw" if lang == "rw" else "en"
+    while True:
+        lang = input(c_prompt("Choose language / Hitamo ururimi (en/rw): ")).strip().lower()
+        if lang in ("en", "rw"):
+            print(c_good(f"✅ Language has been set to {'English' if lang == 'en' else 'Kinyarwanda'}.\n"))
+            return lang
+        else:
+            print(c_warn("❌ Invalid option. Please enter 'en' for English or 'rw' for Kinyarwanda.\n"))
 
 def greet_user(lang):
     name = input(c_prompt(T(lang, "enter_name"))).strip()
@@ -61,11 +66,11 @@ def greet_user(lang):
             print(Fore.WHITE + f"   Symptoms:    {symptoms}")
             print(Fore.WHITE + f"   Conditions:  {conditions}")
             print(Fore.WHITE + f"   Self-care:   {self_care}")
-            time.sleep(0.15)
+            time.sleep(0.01)
 
     return name, user_id
 
-def fake_processing(message="Processing", secs=1.2):
+def fake_processing(message="Processing", secs=0.6):
     print(c_header("\n" + message))
     steps = 4
     for _ in range(steps):
@@ -73,6 +78,7 @@ def fake_processing(message="Processing", secs=1.2):
         time.sleep(secs / steps)
     print()
 
+# ---------- Main Functions ----------
 def symptom_check(lang, user_id):
     all_symptoms = get_all_symptoms()
     print(c_result("\n" + T(lang, "available_symptoms")))
@@ -81,7 +87,7 @@ def symptom_check(lang, user_id):
     symptoms_raw = input(c_prompt("\n" + T(lang, "symptom_prompt")))
     symptoms_list = [s.strip().lower() for s in symptoms_raw.split(",") if s.strip()]
 
-    fake_processing(T(lang, "matching"), secs=1.5)
+    fake_processing(T(lang, "matching"), secs=1.0)
 
     ranked = find_ranked_conditions(symptoms_list)
 
@@ -100,7 +106,7 @@ def symptom_check(lang, user_id):
             print(Fore.WHITE + f"  • {tip}")
         all_conditions.append(condition)
         all_self_care.extend(tips)
-        time.sleep(0.25)
+        time.sleep(0.01)
 
     save_history(
         user_id,
@@ -111,7 +117,7 @@ def symptom_check(lang, user_id):
 
     city = get_user_city(user_id)
     clinic = get_clinic_by_city(city) or get_random_clinic()
-    time.sleep(0.8)
+    time.sleep(0.01)
     if clinic:
         print(c_good(f"\nBefore you go, you can visit {clinic[0]} and see {clinic[1]} (Contact: {clinic[2]})."))
 
@@ -119,7 +125,7 @@ def symptom_check(lang, user_id):
 
 def view_user_history_screen(lang, user_id):
     print(c_header("\n" + T(lang, "history_fetch")))
-    time.sleep(0.6)
+    time.sleep(0.1)
     records = view_history(user_id)
     if not records:
         print(c_info(T(lang, "history_none")))
@@ -130,7 +136,7 @@ def view_user_history_screen(lang, user_id):
         print(Fore.WHITE + f"   Symptoms:    {symptoms}")
         print(Fore.WHITE + f"   Conditions:  {conditions}")
         print(Fore.WHITE + f"   Self-care:   {self_care}")
-        time.sleep(0.15)
+        time.sleep(0.1)
 
 def main_menu(lang):
     print(c_header("\n========== " + T(lang, "main_menu") + " =========="))
@@ -141,11 +147,12 @@ def main_menu(lang):
 
 def exit_app():
     print(Fore.YELLOW + "\nExiting the Health Symptom Checker...")
-    time.sleep(1.5)
+    time.sleep(0.01)
     print(Fore.GREEN + "✅ Successfully exited the Health Symptom Checker. Stay healthy! 💚")
-    time.sleep(1.5)
+    time.sleep(0.01)
     exit(0)
 
+# ---------- Main Application ----------
 def main():
     lang = choose_language()
     banner(lang)

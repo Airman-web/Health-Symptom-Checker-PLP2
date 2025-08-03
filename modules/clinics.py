@@ -71,9 +71,4 @@ def get_all_clinics():
         print(f"Error getting all clinics: {e}")
         cur.close()
         conn.close()
-<<<<<<< HEAD
         return []
-=======
-        return []
-
->>>>>>> fb3dc7aa9f960f6e3966b00c7a2e2dbb470cf2ad
