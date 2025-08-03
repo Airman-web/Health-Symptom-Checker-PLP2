@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# Before dealing with app first install colorama, pyfiglet
 import time
 from colorama import Fore, Style, init
 import pyfiglet
@@ -24,6 +26,7 @@ def c_header(text): return Fore.BLUE + text + Style.RESET_ALL
 def c_result(text): return Fore.MAGENTA + text + Style.RESET_ALL
 
 # ---------- Utilities ----------
+# Functions that calls the database and make the menu
 def get_all_symptoms():
     conn = get_connection()
     cur = conn.cursor()
