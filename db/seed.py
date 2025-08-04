@@ -1,10 +1,35 @@
 # db/seed.py
-from db.database import get_connection, initialize_database
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db.database import get_connection
 
 def seed_data():
-    initialize_database()
     conn = get_connection()
     cur = conn.cursor()
+    
+    # Create tables first if they don't exist
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS symptoms_conditions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            symptom VARCHAR(100) NOT NULL,
+            `condition` VARCHAR(100) NOT NULL,
+            self_care TEXT
+        )
+    ''')
+    
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS clinics (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            city VARCHAR(100) NOT NULL,
+            contact VARCHAR(100)
+        )
+    ''')
+    
+    conn.commit()
+    
+    
 
     symptoms_data = [
         ("fever", "Malaria", "Drink plenty of fluids, rest, and get tested."),
@@ -56,37 +81,40 @@ def seed_data():
         ("swollen feet", "Kidney Disease", "Limit salt intake and see a doctor.")
     ]
 
+    # Insert symptoms_conditions data
+    for symptom, condition, self_care in symptoms_data:
+        cur.execute("""
+            INSERT IGNORE INTO symptoms_conditions (symptom, `condition`, self_care)
+            VALUES (%s, %s, %s)
+        """, (symptom, condition, self_care))
+
+    # Clinics data (name, city, contact - matching your current table structure)
     clinics_data = [
-        # name, doctor, city, district, sector, contact
-        ("King Faisal Hospital", "Dr. Niyonsenga Eric", "Kigali", "Gasabo", "Kimihurura", "+250788111222"),
-        ("Rwanda Military Hospital", "Dr. Uwizeye Alice", "Kigali", "Kicukiro", "Kagarama", "+250788333444"),
-        ("CHUK (University Teaching Hospital)", "Dr. Habimana Jean", "Kigali", "Nyarugenge", "Muhima", "+250788555666"),
-        ("Legacy Clinics", "Dr. Mutesi Paula", "Kigali", "Gasabo", "Remera", "+250788777888"),
-        ("Baho International Hospital", "Dr. Ndayisenga Bosco", "Kigali", "Kicukiro", "Nyarugunga", "+250788999000"),
-        ("Kigali Adventist Dental Clinic", "Dr. Kabanda Celestin", "Kigali", "Nyarugenge", "Kiyovu", "+250788112233"),
-        ("Kigali City Health Center", "Dr. Umutoni Ange", "Kigali", "Nyarugenge", "Nyarugenge", "+250788223344"),
-        ("Polyclinique La Médicale", "Dr. Kalisa Patrick", "Kigali", "Gasabo", "Kacyiru", "+250788334455"),
-        ("Gahanga Health Centre", "Dr. Nyirahabineza Claire", "Kigali", "Kicukiro", "Gahanga", "+250788445566"),
-        ("Kimironko Health Centre", "Dr. Rurangwa Didier", "Kigali", "Gasabo", "Kimironko", "+250788556677"),
-        ("Masaka Hospital", "Dr. Uwamahoro Deborah", "Kigali", "Kicukiro", "Masaka", "+250788667788"),
-        ("Rwandex Clinic", "Dr. Kayitesi Solange", "Kigali", "Nyarugenge", "Rwezamenyo", "+250788778899"),
+        ("King Faisal Hospital", "Kigali", "+250788111222"),
+        ("Rwanda Military Hospital", "Kigali", "+250788333444"),
+        ("CHUK (University Teaching Hospital)", "Kigali", "+250788555666"),
+        ("Legacy Clinics", "Kigali", "+250788777888"),
+        ("Baho International Hospital", "Kigali", "+250788999000"),
+        ("Kigali Adventist Dental Clinic", "Kigali", "+250788112233"),
+        ("Kigali City Health Center", "Kigali", "+250788223344"),
+        ("Polyclinique La Médicale", "Kigali", "+250788334455"),
+        ("Gahanga Health Centre", "Kigali", "+250788445566"),
+        ("Kimironko Health Centre", "Kigali", "+250788556677"),
+        ("Masaka Hospital", "Kigali", "+250788667788"),
+        ("Rwandex Clinic", "Kigali", "+250788778899"),
     ]
 
-    for s, c, t in symptoms_data:
+    # Insert clinics data
+    for name, city, contact in clinics_data:
         cur.execute("""
-            INSERT OR IGNORE INTO symptoms_conditions (symptom, condition, self_care)
-            VALUES (?, ?, ?)
-        """, (s, c, t))
-
-    for name, doctor, city, district, sector, contact in clinics_data:
-        cur.execute("""
-            INSERT OR IGNORE INTO clinics (name, doctor, city, district, sector, contact)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (name, doctor, city, district, sector, contact))
+            INSERT IGNORE INTO clinics (name, city, contact)
+            VALUES (%s, %s, %s)
+        """, (name, city, contact))
 
     conn.commit()
+    cur.close()
     conn.close()
-    print("✅ Database seeded successfully with extended symptoms and Kigali clinics!")
+    print("✅ Database seeded successfully with symptoms and Kigali clinics!")
 
 if __name__ == "__main__":
     seed_data()
